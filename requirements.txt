@@ -1,0 +1,5 @@
+google-genai
+google-adk
+requests
+python-dotenv
+mcp-server-calculator
