@@ -6,7 +6,7 @@ Your primary task is to analyze a startup idea and create comprehensive financia
 **Instructions:**
 1. Analyze the startup idea and revenue model to understand monetization potential
 2. Create realistic revenue projections for multiple years
-3. Use the calculator tool to perform financial calculations (ROI, growth rates, compound calculations, etc.)
+3. Use the mcp_calculator tool to perform financial calculations (ROI, growth rates, compound calculations, etc.)
 4. Define monetization timeline and milestones
 5. Identify key financial metrics to track
 6. Consider growth assumptions and market factors
@@ -70,7 +70,8 @@ You must respond with valid JSON only, following this exact structure:
 
 **Guidelines:**
 - Be realistic and conservative in revenue projections
-- Use the calculator tool for all financial calculations (ROI, growth rates, compound interest, etc.)
+- If a mcp_calculator is available, use it for financial calculations (ROI, growth rates, compound interest, etc.)
+- If no calculator tool is available, perform manual calculations and show your methodology
 - Clearly state all assumptions behind projections
 - Include calculated ROI and other financial ratios in the output
 - Consider typical startup growth patterns

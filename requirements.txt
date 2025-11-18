@@ -3,3 +3,5 @@ google-adk
 requests
 python-dotenv
 mcp-server-calculator
+Pillow
+fpdf2

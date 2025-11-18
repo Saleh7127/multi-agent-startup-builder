@@ -1,4 +1,3 @@
-
 import asyncio
 import sys
 from pathlib import Path
@@ -11,16 +10,20 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from utils.retryConfig import retry_config
-from prompts.idea_intake_prompt import IDEA_INTAKE_PROMPT
+from prompts.visual_identity_prompt import VISUAL_IDENTITY_PROMPT
+from tools.logo_generation_tool import logo_generation_tool
+
 
 load_dotenv()
 
-idea_intake_agent = Agent(
-    name="idea_intake_agent",
+visual_identity_agent = Agent(
+    name="visual_identity_agent",
     model=Gemini(
         model="gemini-2.5-flash-lite",
         retry_options=retry_config
     ),
-    instruction=IDEA_INTAKE_PROMPT,
-    output_key="idea_intake_result",
+    instruction=VISUAL_IDENTITY_PROMPT,
+    tools=[logo_generation_tool],
+    output_key="visual_identity_result",
 )
+
