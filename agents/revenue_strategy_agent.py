@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -14,10 +14,10 @@ from prompts.revenue_strategy_prompt import REVENUE_STRATEGY_PROMPT
 
 load_dotenv()
 
-revenue_strategy_agent = Agent(
+revenue_strategy_agent = LlmAgent(
     name="revenue_strategy_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=REVENUE_STRATEGY_PROMPT,

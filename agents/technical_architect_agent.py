@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -14,10 +14,10 @@ from prompts.technical_architect_prompt import TECHNICAL_ARCHITECT_PROMPT
 
 load_dotenv()
 
-technical_architect_agent = Agent(
+technical_architect_agent = LlmAgent(
     name="technical_architect_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=TECHNICAL_ARCHITECT_PROMPT,

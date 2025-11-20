@@ -1,17 +1,16 @@
 """
-Brain Agent Orchestration Prompt
+ROOT Agent Orchestration Prompt
 
-This document describes the multi-agent workflow orchestrated by the Brain Agent.
-The Brain Agent uses Google ADK's SequentialAgent to execute all agents in sequence,
+This document describes the multi-agent workflow orchestrated by the ROOT Agent.
+The ROOT Agent uses Google ADK's SequentialAgent to execute all agents in sequence,
 with each agent's output available to subsequent agents via {output_key} placeholders.
 """
 
-BRAIN_AGENT_WORKFLOW = """
+ROOT_AGENT_WORKFLOW = """
 # Multi-Agent Startup Builder - Agent Orchestration Workflow
 
 ## Overview
-The Brain Agent orchestrates a sequential pipeline of specialized agents to transform a raw startup idea into a comprehensive pitch deck with PDF output.
-
+The Root Agent orchestrates a sequential pipeline of specialized agents to transform a raw startup idea into a comprehensive pitch deck with PDF output.
 ## Agent Execution Flow
 
 ### 1. `idea_intake_agent`
@@ -204,7 +203,7 @@ The Brain Agent orchestrates a sequential pipeline of specialized agents to tran
 
 ## Execution Notes
 
-- The Brain Agent uses Google ADK's SequentialAgent to manage the execution flow
+- The ROOT Agent uses Google ADK's SequentialAgent to manage the execution flow
 - Each agent's output is automatically stored in session state with its output_key
 - Subsequent agents can reference previous outputs using {output_key} syntax in their instructions
 - The entire pipeline runs automatically from a single startup idea input

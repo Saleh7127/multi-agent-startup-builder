@@ -3,7 +3,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import Agent, LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -15,10 +15,10 @@ from prompts.idea_intake_prompt import IDEA_INTAKE_PROMPT
 
 load_dotenv()
 
-idea_intake_agent = Agent(
+idea_intake_agent = LlmAgent(
     name="idea_intake_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=IDEA_INTAKE_PROMPT,

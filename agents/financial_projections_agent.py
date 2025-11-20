@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -15,10 +15,10 @@ from tools.mcp_calculator import mcp_calculator
 
 load_dotenv()
 
-financial_projections_agent = Agent(
+financial_projections_agent = LlmAgent(
     name="financial_projections_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=FINANCIAL_PROJECTIONS_PROMPT,

@@ -1,19 +1,21 @@
 """
-Brain Agent - Orchestrates all agents sequentially using Google ADK SequentialAgent.
+ROOT Agent - Orchestrates all agents sequentially using Google ADK SequentialAgent.
 This agent chains all individual agents together, passing outputs from one to the next.
 
-For detailed workflow documentation, see prompts.brain_agent_prompt.BRAIN_AGENT_WORKFLOW
+For detailed workflow documentation, see prompts.root_agent_prompt.ROOT_AGENT_WORKFLOW
 """
 
 import sys
 from pathlib import Path
 from google.adk.agents import SequentialAgent
+from google.adk.runners import InMemoryRunner
+
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import brain agent workflow documentation
-from prompts.brain_agent_prompt import BRAIN_AGENT_WORKFLOW
+# Import root agent workflow documentation
+from prompts.root_agent_prompt import ROOT_AGENT_WORKFLOW
 
 # Import all individual agents
 from .idea_intake_agent import idea_intake_agent
@@ -32,15 +34,15 @@ from .pitch_deck_agent import pitch_deck_agent
 # Each agent can access previous agent outputs using {output_key} placeholders
 # 
 # Workflow Documentation:
-# The brain agent orchestrates 11 specialized agents in sequence:
+# The root agent orchestrates 11 specialized agents in sequence:
 # 1. Idea Intake → 2. Market Analysis → 3. Competitor Research → 4. Customer Persona →
 # 5. MVP Feature Planner → 6. Technical Architect → 7. Revenue Strategy →
 # 8. Financial Projections → 9. Go-to-Market → 10. Visual Identity → 11. Pitch Deck
 #
-# The BRAIN_AGENT_WORKFLOW provides complete workflow details, agent duties, inputs, and outputs
-brain_agent = SequentialAgent(
-    name="BrainAgent",
-    description=BRAIN_AGENT_WORKFLOW,  # Use workflow documentation as description
+# The ROOT_AGENT_WORKFLOW provides complete workflow details, agent duties, inputs, and outputs
+root_agent = SequentialAgent(
+    name="RootAgent",
+    description=ROOT_AGENT_WORKFLOW,  # Use workflow documentation as description
     sub_agents=[
         idea_intake_agent,
         market_analysis_agent,
@@ -57,8 +59,10 @@ brain_agent = SequentialAgent(
 )
 
 # Export both the class and instance
-BrainAgent = brain_agent
+RootAgent = root_agent
+
+runner = InMemoryRunner(agent=root_agent)
 
 # Export the workflow documentation for reference
-__all__ = ["brain_agent", "BrainAgent", "BRAIN_AGENT_WORKFLOW"]
+__all__ = ["root_agent", "RootAgent", "ROOT_AGENT_WORKFLOW"]
 

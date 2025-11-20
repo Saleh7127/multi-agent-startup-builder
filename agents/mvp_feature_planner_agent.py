@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -14,10 +14,10 @@ from prompts.mvp_feature_planner_prompt import MVP_FEATURE_PLANNER_PROMPT
 
 load_dotenv()
 
-mvp_feature_planner_agent = Agent(
+mvp_feature_planner_agent = LlmAgent(
     name="mvp_feature_planner_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=MVP_FEATURE_PLANNER_PROMPT,

@@ -2,7 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import Agent
+from google.adk.agents import Agent, LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
 
@@ -16,10 +16,10 @@ from tools.logo_generation_tool import logo_generation_tool
 
 load_dotenv()
 
-visual_identity_agent = Agent(
+visual_identity_agent = LlmAgent(
     name="visual_identity_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         retry_options=retry_config
     ),
     instruction=VISUAL_IDENTITY_PROMPT,

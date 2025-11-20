@@ -16,6 +16,14 @@ def _slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "pitch-deck"
 
 
+def _clean_bullets(text: str) -> str:
+    """Replace unsupported bullet characters with dashes."""
+    if not isinstance(text, str):
+        return text
+    # Replace various bullet characters with dash
+    return text.replace("•", "-").replace("▪", "-").replace("▫", "-").replace("‣", "-").replace("⁃", "-")
+
+
 def _add_section(pdf: FPDF, title: str, content: list[str] | str, is_metrics: bool = False) -> None:
     """Add a section to the PDF."""
     # Add section title
@@ -34,8 +42,9 @@ def _add_section(pdf: FPDF, title: str, content: list[str] | str, is_metrics: bo
         # Handle list of bullets
         for item in content:
             if item:
-                pdf.cell(5, 6, "•", ln=0)
-                pdf.multi_cell(0, 6, item, ln=1)
+                cleaned_item = _clean_bullets(str(item))
+                pdf.cell(5, 6, "-", ln=0)
+                pdf.multi_cell(0, 6, cleaned_item, ln=1)
                 pdf.ln(1)
     pdf.ln(3)
 
@@ -86,19 +95,19 @@ def generate_pitch_deck_pdf(
         tagline = data.get("tagline", "")
         if tagline:
             pdf.set_font("Arial", "", 14)
-            pdf.cell(0, 10, tagline, ln=1, align="C")
+            pdf.cell(0, 10, _clean_bullets(tagline), ln=1, align="C")
         
         pdf.ln(10)
         pdf.set_font("Arial", "", 12)
         elevator_pitch = data.get("elevator_pitch", "")
         if elevator_pitch:
-            pdf.multi_cell(0, 6, elevator_pitch, ln=1, align="C")
+            pdf.multi_cell(0, 6, _clean_bullets(elevator_pitch), ln=1, align="C")
 
         # Add sections
         sections = data.get("sections", [])
         for section in sections:
             pdf.add_page()
-            title = section.get("title", "")
+            title = _clean_bullets(section.get("title", ""))
             bullets = section.get("bullets", [])
             _add_section(pdf, title, bullets)
 
@@ -117,8 +126,9 @@ def generate_pitch_deck_pdf(
                     pdf.set_font("Arial", "", 11)
                     for item in items:
                         if item:
-                            pdf.cell(5, 6, "•", ln=0)
-                            pdf.multi_cell(0, 6, item, ln=1)
+                            cleaned_item = _clean_bullets(str(item))
+                            pdf.cell(5, 6, "-", ln=0)
+                            pdf.multi_cell(0, 6, cleaned_item, ln=1)
                             pdf.ln(1)
                     pdf.ln(3)
 
@@ -143,8 +153,9 @@ def generate_pitch_deck_pdf(
                 pdf.set_font("Arial", "", 11)
                 for item in use_of_funds:
                     if item:
-                        pdf.cell(5, 6, "•", ln=0)
-                        pdf.multi_cell(0, 6, item, ln=1)
+                        cleaned_item = _clean_bullets(str(item))
+                        pdf.cell(5, 6, "-", ln=0)
+                        pdf.multi_cell(0, 6, cleaned_item, ln=1)
                         pdf.ln(1)
                 pdf.ln(2)
             
@@ -155,15 +166,16 @@ def generate_pitch_deck_pdf(
                 pdf.set_font("Arial", "", 11)
                 for item in milestones:
                     if item:
-                        pdf.cell(5, 6, "•", ln=0)
-                        pdf.multi_cell(0, 6, item, ln=1)
+                        cleaned_item = _clean_bullets(str(item))
+                        pdf.cell(5, 6, "-", ln=0)
+                        pdf.multi_cell(0, 6, cleaned_item, ln=1)
                         pdf.ln(1)
                 pdf.ln(2)
             
             timeline = investment.get("timeline", "")
             if timeline:
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 8, f"Timeline: {timeline}", ln=1)
+                pdf.cell(0, 8, f"Timeline: {_clean_bullets(timeline)}", ln=1)
 
         # Add call to action
         cta = data.get("call_to_action", "")
@@ -173,7 +185,7 @@ def generate_pitch_deck_pdf(
             pdf.cell(0, 10, "Next Steps", ln=1)
             pdf.ln(5)
             pdf.set_font("Arial", "", 12)
-            pdf.multi_cell(0, 6, cta, ln=1)
+            pdf.multi_cell(0, 6, _clean_bullets(cta), ln=1)
 
         # Add risks/diligence
         risks = data.get("risks_or_diligence", [])
@@ -185,8 +197,9 @@ def generate_pitch_deck_pdf(
             pdf.set_font("Arial", "", 11)
             for risk in risks:
                 if risk:
-                    pdf.cell(5, 6, "•", ln=0)
-                    pdf.multi_cell(0, 6, risk, ln=1)
+                    cleaned_risk = _clean_bullets(str(risk))
+                    pdf.cell(5, 6, "-", ln=0)
+                    pdf.multi_cell(0, 6, cleaned_risk, ln=1)
                     pdf.ln(1)
 
         # Save PDF
