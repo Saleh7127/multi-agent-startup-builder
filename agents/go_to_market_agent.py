@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from google.adk.agents import Agent, LlmAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
-from google.adk.tools import AgentTool, google_search
+from google.adk.tools import google_search
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))

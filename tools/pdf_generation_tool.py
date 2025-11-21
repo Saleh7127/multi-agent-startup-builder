@@ -74,6 +74,11 @@ def generate_pitch_deck_pdf(
         if not filename or not filename.strip():
             slug = _slugify(company_name)
             filename = f"{slug}_pitch_deck.pdf"
+        else:
+            # Ensure filename has .pdf extension
+            filename = filename.strip()
+            if not filename.endswith(".pdf"):
+                filename = f"{filename}.pdf"
 
         # Create output directory
         output_path = Path(output_dir)

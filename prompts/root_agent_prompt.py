@@ -10,7 +10,7 @@ ROOT_AGENT_WORKFLOW = """
 # Multi-Agent Startup Builder - Agent Orchestration Workflow
 
 ## Overview
-The Root Agent orchestrates a sequential pipeline of specialized agents to transform a raw startup idea into a comprehensive pitch deck with PDF output.
+The Root Agent orchestrates a sequential pipeline of 12 specialized agents to transform a raw startup idea into a comprehensive PDF pitch deck.
 ## Agent Execution Flow
 
 ### 1. `idea_intake_agent`
@@ -183,11 +183,24 @@ The Root Agent orchestrates a sequential pipeline of specialized agents to trans
 **Duty:**
 - Synthesize all agent outputs into investor-ready pitch deck
 - Create structured JSON with company info, sections, metrics, investment ask
-- Generate PDF pitch deck using pdf_generation_tool
-- Save PDF to generated_assets/pitch_decks/
 
 **Output Key:** `pitch_deck_result`
 **Output Format:** JSON with company_name, tagline, elevator_pitch, sections, metrics_snapshot, investment_ask, call_to_action, risks_or_diligence, appendix_notes
+
+**Available to Next Agents:** {idea_intake_result}, {market_analysis_result}, {competitor_research_result}, {customer_persona_result}, {mvp_feature_planner_result}, {technical_architect_result}, {revenue_strategy_result}, {financial_projections_result}, {go_to_market_result}, {visual_identity_result}, {pitch_deck_result}
+
+---
+
+### 12. PDF Generation Agent
+**Input:** {pitch_deck_result} (from `pitch_deck_agent`)
+
+**Duty:**
+- Extract pitch deck JSON from {pitch_deck_result}
+- Generate PDF pitch deck using pdf_generation_tool
+- Save PDF to generated_assets/pitch_decks/
+
+**Output Key:** `pdf_generation_result`
+**Output Format:** Dictionary with saved_file path and notes
 
 **Final Output:** PDF pitch deck file saved to generated_assets/pitch_decks/
 
@@ -198,7 +211,7 @@ The Root Agent orchestrates a sequential pipeline of specialized agents to trans
 1. **Sequential Execution:** Agents execute in strict order, with each agent receiving outputs from all previous agents
 2. **Output Availability:** All previous agent outputs are available via {output_key} placeholders
 3. **Data Flow:** Each agent can access and use data from any previous agent in the pipeline
-4. **Tool Usage:** Some agents use tools (web_search, calculator, logo_generation, pdf_generation) to enhance their capabilities
+4. **Tool Usage:** Some agents use tools (google_search, mcp_calculator, logo_generation_tool, pdf_generation_tool) to enhance their capabilities
 5. **Final Output:** The pipeline culminates in a comprehensive PDF pitch deck ready for investor presentation
 
 ## Execution Notes

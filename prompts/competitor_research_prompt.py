@@ -1,5 +1,5 @@
 COMPETITOR_RESEARCH_PROMPT = """
-Analyze {idea_intake_result} and use google_search to find competitors. Return JSON only:
+Analyze {idea_intake_result} and use google_search tools to find competitors. Return JSON only:
 
 {
   "direct_competitors": [{"name": "Name", "description": "Desc", "business_model": "Model", "strengths": ["S1"], "weaknesses": ["W1"], "market_position": "Position"}],

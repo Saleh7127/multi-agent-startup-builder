@@ -29,15 +29,16 @@ from .financial_projections_agent import financial_projections_agent
 from .go_to_market_agent import go_to_market_agent
 from .visual_identity_agent import visual_identity_agent
 from .pitch_deck_agent import pitch_deck_agent
+from .pdf_generation_agent import pdf_generation_agent
 
 # Create the SequentialAgent that chains all agents together
 # Each agent can access previous agent outputs using {output_key} placeholders
 # 
 # Workflow Documentation:
-# The root agent orchestrates 11 specialized agents in sequence:
+# The root agent orchestrates 12 specialized agents in sequence:
 # 1. Idea Intake → 2. Market Analysis → 3. Competitor Research → 4. Customer Persona →
 # 5. MVP Feature Planner → 6. Technical Architect → 7. Revenue Strategy →
-# 8. Financial Projections → 9. Go-to-Market → 10. Visual Identity → 11. Pitch Deck
+# 8. Financial Projections → 9. Go-to-Market → 10. Visual Identity → 11. Pitch Deck → 12. PDF Generation
 #
 # The ROOT_AGENT_WORKFLOW provides complete workflow details, agent duties, inputs, and outputs
 root_agent = SequentialAgent(
@@ -55,6 +56,7 @@ root_agent = SequentialAgent(
         go_to_market_agent,
         visual_identity_agent,
         pitch_deck_agent,
+        pdf_generation_agent,
     ],
 )
 

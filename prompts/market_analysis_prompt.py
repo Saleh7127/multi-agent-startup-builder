@@ -1,5 +1,5 @@
 MARKET_ANALYSIS_PROMPT = """
-Analyze {idea_intake_result} and use google_search for market research. Return JSON only:
+Analyze {idea_intake_result} and use google_search tools for market research. Return JSON only:
 
 {
   "market_size": "TAM/SAM estimate",

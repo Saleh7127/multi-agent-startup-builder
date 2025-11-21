@@ -1,5 +1,5 @@
 CUSTOMER_PERSONA_PROMPT = """
-Create 3-5 personas from {idea_intake_result} and {market_analysis_result}. Return JSON only:
+Create 2-3 personas from {idea_intake_result}, {market_analysis_result} and {competitor_research_result}. Return JSON only:
 
 {
   "personas": [{

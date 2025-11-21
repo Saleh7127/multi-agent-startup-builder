@@ -13,6 +13,7 @@ from .revenue_strategy_agent import revenue_strategy_agent
 from .financial_projections_agent import financial_projections_agent
 from .visual_identity_agent import visual_identity_agent
 from .pitch_deck_agent import pitch_deck_agent
+from .pdf_generation_agent import pdf_generation_agent
 from .root_agent import root_agent, RootAgent
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "go_to_market_agent",
     "visual_identity_agent",
     "pitch_deck_agent",
+    "pdf_generation_agent",
     "RootAgent",
     "root_agent",
     "customer_persona_agent",
