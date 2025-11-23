@@ -1,6 +1,15 @@
 """
-ROOT Agent - Orchestrates all agents sequentially using Google ADK SequentialAgent.
-This agent chains all individual agents together, passing outputs from one to the next.
+ROOT Agent - Orchestrates all agents using Google ADK with parallel processing and iterative refinement.
+This agent chains agents together with parallel execution where possible and iterative loops for refinement.
+
+New Architecture:
+1. Idea Intake (Sequential)
+2. Market Analysis + Competitor Research (PARALLEL)
+3. Customer Persona (Sequential - synthesizes research)
+4. MVP Planner + Tech Architect + Revenue Strategy (PARALLEL)
+5. Financial → GTM → Visual Identity (Sequential)
+6. Pitch Deck ↔ VC Critic (LOOP - max 3 iterations)
+7. PDF Generation (Sequential - only if approved)
 
 For detailed workflow documentation, see prompts.root_agent_prompt.ROOT_AGENT_WORKFLOW
 """
@@ -17,45 +26,49 @@ sys.path.insert(0, str(project_root))
 # Import root agent workflow documentation
 from prompts.root_agent_prompt import ROOT_AGENT_WORKFLOW
 
-# Import all individual agents
+# Import individual agents
 from .idea_intake_agent import idea_intake_agent
-from .market_analysis_agent import market_analysis_agent
-from .competitor_research_agent import competitor_research_agent
 from .customer_persona_agent import customer_persona_agent
-from .mvp_feature_planner_agent import mvp_feature_planner_agent
-from .technical_architect_agent import technical_architect_agent
-from .revenue_strategy_agent import revenue_strategy_agent
 from .financial_projections_agent import financial_projections_agent
 from .go_to_market_agent import go_to_market_agent
 from .visual_identity_agent import visual_identity_agent
-from .pitch_deck_agent import pitch_deck_agent
 from .pdf_generation_agent import pdf_generation_agent
 
-# Create the SequentialAgent that chains all agents together
-# Each agent can access previous agent outputs using {output_key} placeholders
-# 
-# Workflow Documentation:
-# The root agent orchestrates 12 specialized agents in sequence:
-# 1. Idea Intake → 2. Market Analysis → 3. Competitor Research → 4. Customer Persona →
-# 5. MVP Feature Planner → 6. Technical Architect → 7. Revenue Strategy →
-# 8. Financial Projections → 9. Go-to-Market → 10. Visual Identity → 11. Pitch Deck → 12. PDF Generation
-#
-# The ROOT_AGENT_WORKFLOW provides complete workflow details, agent duties, inputs, and outputs
+# Import parallel and loop agents
+from .parallel_research_agent import parallel_research_agent
+from .parallel_planning_agent import parallel_planning_agent
+from .pitch_refinement_loop_agent import pitch_refinement_loop_agent
+
+# Create the improved SequentialAgent that orchestrates phases:
+# Each phase can be a sequential, parallel, or loop agent
 root_agent = SequentialAgent(
     name="RootAgent",
-    description=ROOT_AGENT_WORKFLOW,  # Use workflow documentation as description
+    description=ROOT_AGENT_WORKFLOW,
     sub_agents=[
+        # Phase 1: Idea Intake (Sequential)
         idea_intake_agent,
-        market_analysis_agent,
-        competitor_research_agent,
+        
+        # Phase 2: Parallel Research (ParallelAgent)
+        parallel_research_agent,
+        
+        # Phase 3: Customer Persona (Sequential - synthesizes research)
         customer_persona_agent,
-        mvp_feature_planner_agent,
-        technical_architect_agent,
-        revenue_strategy_agent,
+        
+        # Phase 4: Parallel Planning (ParallelAgent)
+        parallel_planning_agent,
+        
+        # Phase 5: Sequential Execution (SequentialAgent)
+        # Financial depends on revenue_strategy (from parallel planning)
         financial_projections_agent,
+        # GTM can run after customer_persona is ready
         go_to_market_agent,
+        # Visual Identity can run independently
         visual_identity_agent,
-        pitch_deck_agent,
+        
+        # Phase 6: Iterative Pitch Refinement (LoopAgent)
+        pitch_refinement_loop_agent,
+        
+        # Phase 7: PDF Generation (Sequential - only runs after loop exits)
         pdf_generation_agent,
     ],
 )
