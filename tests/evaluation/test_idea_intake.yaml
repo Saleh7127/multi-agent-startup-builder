@@ -1,0 +1,8 @@
+test_cases:
+  - name: "Simple Idea Intake"
+    agent: "agents.idea_intake_agent.idea_intake_agent"
+    prompt: "I want to build a platform for connecting dog walkers with owners."
+    expected_response: "Successfully processed the startup idea."
+    evaluators:
+      - name: "response_match_score"
+        threshold: 0.5

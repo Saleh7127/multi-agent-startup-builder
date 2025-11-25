@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from dotenv import load_dotenv
 from google.adk.runners import Runner, types
+from google.adk.plugins.logging_plugin import LoggingPlugin
 
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
@@ -47,6 +48,7 @@ async def main():
         agent=root_agent,
         session_service=session_service,
         memory_service=memory_service,
+        plugins=[LoggingPlugin()],
     )
     
     stored_outputs = set()
@@ -61,11 +63,6 @@ async def main():
         
         try:
             async for event in event_gen:
-                if hasattr(event, 'content') and event.content and event.content.parts:
-                    for part in event.content.parts:
-                        if hasattr(part, 'text') and part.text:
-                            print(f"📝 Event: {part.text[:100]}...")
-                
                 if hasattr(event, 'agent_state') and event.agent_state:
                     state = event.agent_state
                     if hasattr(state, 'to_dict'):
@@ -90,35 +87,10 @@ async def main():
                                             response_json=response_str,
                                         )
                                         stored_outputs.add(output_key)
-                                        print(f"💾 Stored: {agent_name}")
-                                except Exception as e:
-                                    print(f"⚠️  Error storing {agent_name}: {e}")
-        except (TypeError, RuntimeError, Exception) as e:
-            error_msg = str(e)
-            error_type = type(e).__name__
-            traceback_str = ""
-            try:
-                import traceback
-                traceback_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
-            except:
-                pass
-            
-            is_non_critical = (
-                "'NoneType' object is not iterable" in error_msg or
-                "cancel scope" in error_msg.lower() or 
-                "mcp" in error_msg.lower() or
-                "stdio_client" in error_msg.lower() or
-                "asyncgen" in error_msg.lower() or
-                "ExceptionGroup" in error_type or
-                "BaseExceptionGroup" in error_type or
-                "asyncgen" in traceback_str.lower()
-            )
-            
-            if is_non_critical:
-                print(f"\n⚠️  Non-critical error ({error_type}): {error_msg[:100]}")
-                print("   Continuing with session retrieval and data storage...")
-            else:
-                raise
+                                except Exception:
+                                    pass
+        except (TypeError, RuntimeError, Exception):
+            pass
         finally:
             try:
                 await event_gen.aclose()
@@ -133,15 +105,10 @@ async def main():
             )
             
             if session:
-                session_id_attr = getattr(session, 'id', getattr(session, 'session_id', session_id))
-                print(f"🔍 Retrieved session: {session_id_attr}")
-                print(f"🔍 Session type: {type(session)}")
+                state = getattr(session, 'state', None)
                 
-                if hasattr(session, 'state') and session.state:
-                    state = session.state
-                    print(f"🔍 State type: {type(state)}")
-                    
-                    state_dict = {}
+                state_dict = {}
+                if state:
                     if isinstance(state, dict):
                         state_dict = state
                     elif hasattr(state, 'to_dict'):
@@ -149,95 +116,41 @@ async def main():
                             state_dict = state.to_dict() or {}
                         except:
                             state_dict = {}
-                    
-                    if state_dict:
-                        print(f"🔍 State dict keys: {list(state_dict.keys())[:20]}")
-                        
-                        for output_key, value in state_dict.items():
-                            if output_key.endswith('_result') and output_key not in stored_outputs and value:
-                                agent_name = get_agent_name_from_output_key(output_key)
-                                try:
-                                    if isinstance(value, str):
-                                        response_str = value
-                                    elif isinstance(value, dict):
-                                        response_str = json.dumps(value, ensure_ascii=False)
-                                    else:
-                                        response_str = str(value)
-                                    
-                                    if response_str and response_str.strip():
-                                        memory_service.store_agent_response(
-                                            app_name=APP_NAME,
-                                            user_id=user_id,
-                                            session_id=session_id,
-                                            agent_name=agent_name,
-                                            response_json=response_str,
-                                        )
-                                        stored_outputs.add(output_key)
-                                        print(f"💾 Stored (final): {agent_name}")
-                                except Exception as e:
-                                    print(f"⚠️  Error storing {agent_name}: {e}")
-                    else:
-                        print(f"⚠️  Could not extract state dict")
-                else:
-                    print(f"⚠️  Session has no state or state is None")
+                
+                if state_dict:
+                    for output_key, value in state_dict.items():
+                        if output_key.endswith('_result') and output_key not in stored_outputs and value:
+                            agent_name = get_agent_name_from_output_key(output_key)
+                            try:
+                                if isinstance(value, str):
+                                    response_str = value
+                                elif isinstance(value, dict):
+                                    response_str = json.dumps(value, ensure_ascii=False)
+                                else:
+                                    response_str = str(value)
+                                
+                                if response_str and response_str.strip():
+                                    memory_service.store_agent_response(
+                                        app_name=APP_NAME,
+                                        user_id=user_id,
+                                        session_id=session_id,
+                                        agent_name=agent_name,
+                                        response_json=response_str,
+                                    )
+                                    stored_outputs.add(output_key)
+                            except Exception:
+                                pass
                 
                 try:
                     await memory_service.add_session_to_memory(session)
-                    print("💾 Session transferred to memory")
+                except Exception:
+                    pass
                     
-                    event_count = len(session.events) if hasattr(session, 'events') and session.events else 0
-                    print(f"📊 Session events in DB: {event_count}")
-                    
-                    if event_count > 0 and hasattr(session, 'events'):
-                        print(f"   First event author: {session.events[0].author if len(session.events) > 0 else 'None'}")
-                except Exception as e:
-                    print(f"⚠️  Error transferring session to memory: {e}")
-                    import traceback
-                    traceback.print_exc()
-                
-        except Exception as e:
-            print(f"⚠️  Error saving session to memory: {e}")
+        except Exception:
+            pass
         
-        print("\n✅ Process completed!")
-        print(f"💾 Responses stored: {len(stored_outputs)} agents")
-        print(f"📁 Databases: memory/agent_responses.db, memory/sessions.db")
-        
-        import sqlite3
-        try:
-            with sqlite3.connect("memory/agent_responses.db") as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT COUNT(*) FROM agent_responses")
-                count = cursor.fetchone()[0]
-                print(f"📊 Agent responses in DB: {count}")
-        except Exception as e:
-            print(f"⚠️  Could not check DB: {e}")
-        
-        try:
-            with sqlite3.connect("memory/sessions.db") as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT COUNT(*) FROM events")
-                event_count = cursor.fetchone()[0]
-                cursor.execute("SELECT COUNT(*) FROM sessions")
-                session_count = cursor.fetchone()[0]
-                print(f"📊 Sessions in DB: {session_count}, Events in DB: {event_count}")
-        except Exception as e:
-            print(f"⚠️  Could not check sessions DB: {e}")
-        
-    except Exception as e:
-        error_str = str(e)
-        error_type = type(e).__name__
-        traceback_str = str(e.__traceback__) if hasattr(e, '__traceback__') else ""
-        
-        if ("cancel scope" in error_str.lower() or 
-            "mcp" in error_str.lower() or 
-            "stdio_client" in error_str.lower() or
-            "ExceptionGroup" in error_type or
-            "BaseExceptionGroup" in error_type or
-            "asyncgen" in traceback_str.lower()):
-            print("\n⚠️  MCP cleanup warning (non-critical - can be ignored)")
-            print("✅ Process completed successfully")
-        else:
-            raise
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

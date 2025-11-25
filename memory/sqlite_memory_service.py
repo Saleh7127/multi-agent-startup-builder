@@ -17,7 +17,6 @@ class SqliteMemoryService(BaseMemoryService):
     async def add_session_to_memory(self, session):
         """
         Transfer session data to memory storage.
-        Based on notebook pattern: extracts agent responses from session state.
         Also stores session events for cross-session retrieval.
         """
         try:
@@ -31,17 +30,11 @@ class SqliteMemoryService(BaseMemoryService):
             user_id = getattr(session, 'user_id', None)
             
             if not session_id or not user_id:
-                print(f"⚠️  Missing session_id or user_id. Session attrs: {[a for a in dir(session) if not a.startswith('__')][:20]}")
                 return
-            
-            print(f"🔍 Processing session: {session_id}, user: {user_id}")
             
             state = getattr(session, 'state', None)
             if not state:
-                print(f"⚠️  Session has no state: {session_id}")
                 return
-            
-            stored_count = 0
             
             state_dict = {}
             if isinstance(state, dict):
@@ -52,17 +45,9 @@ class SqliteMemoryService(BaseMemoryService):
                 except:
                     state_dict = {}
             else:
-                print(f"⚠️  Session state is not a dict and has no to_dict method. State type: {type(state)}")
                 return
             
-            if state_dict:
-                all_keys = list(state_dict.keys())
-                result_keys = [k for k in all_keys if k.endswith('_result')]
-                print(f"🔍 State dict has {len(state_dict)} keys")
-                print(f"🔍 All keys (first 30): {all_keys[:30]}")
-                print(f"🔍 Result keys found: {result_keys}")
-            else:
-                print(f"⚠️  State dict is empty")
+            if not state_dict:
                 return
             
             for output_key, value in state_dict.items():
@@ -85,14 +70,11 @@ class SqliteMemoryService(BaseMemoryService):
                                 agent_name=agent_name,
                                 response_json=response_str,
                             )
-                            stored_count += 1
-                            print(f"💾 Stored from state: {agent_name}")
-                    except Exception as e:
-                        print(f"⚠️  Error storing {agent_name}: {e}")
+                    except Exception:
+                        pass
             
             events = getattr(session, 'events', None)
             if events:
-                print(f"🔍 Processing {len(events)} session events...")
                 for event in events:
                     author = getattr(event, 'author', None)
                     content = getattr(event, 'content', None)
@@ -111,19 +93,10 @@ class SqliteMemoryService(BaseMemoryService):
                                             agent_name=agent_name,
                                             response_json=text,
                                         )
-                                        stored_count += 1
-                                        print(f"💾 Stored from event: {agent_name}")
-                                except Exception as e:
-                                    print(f"⚠️  Error storing event {agent_name}: {e}")
-            
-            if stored_count > 0:
-                print(f"✅ Stored {stored_count} agent responses to memory")
-            else:
-                print(f"⚠️  No agent responses found. State keys: {list(state_dict.keys())}, Events: {len(events) if events else 0}")
-        except Exception as e:
-            print(f"⚠️  Error adding session to memory: {e}")
-            import traceback
-            traceback.print_exc()
+                                except Exception:
+                                    pass
+        except Exception:
+            pass
     
     async def search_memory(self, query: str, user_id: str = None, limit: int = 10):
         """
