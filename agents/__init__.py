@@ -15,7 +15,8 @@ from .visual_identity_agent import visual_identity_agent
 from .pitch_deck_agent import pitch_deck_agent
 from .vc_critic_agent import vc_critic_agent
 from .pdf_generation_agent import pdf_generation_agent
-from .root_agent import root_agent, RootAgent
+from .startup_builder_orchestrator import startup_builder_orchestrator, StartupBuilderOrchestrator
+from .root_agent import root_agent
 from .parallel_research_agent import parallel_research_agent
 from .parallel_planning_agent import parallel_planning_agent
 from .pitch_refinement_loop_agent import pitch_refinement_loop_agent
@@ -29,7 +30,8 @@ __all__ = [
     "pitch_deck_agent",
     "vc_critic_agent",
     "pdf_generation_agent",
-    "RootAgent",
+    "StartupBuilderOrchestrator",
+    "startup_builder_orchestrator",
     "root_agent",
     "customer_persona_agent",
     "mvp_feature_planner_agent",

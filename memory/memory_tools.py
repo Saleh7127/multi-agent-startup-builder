@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from google.adk.tools import FunctionTool
 from .memory_config import memory_service
 
@@ -28,8 +29,8 @@ def store_agent_response(
 def get_agent_response(
     agent_name: str,
     app_name: str = "startup-builder",
-    user_id: str = None,
-    session_id: str = None,
+    user_id: Optional[str] = None,
+    session_id: Optional[str] = None,
 ) -> dict:
     try:
         if user_id is None or session_id is None:
@@ -66,9 +67,25 @@ def get_session_responses(
 def get_latest_agent_response(
     agent_name: str,
     app_name: str = "startup-builder",
-    user_id: str = None,
+    user_id: Optional[str] = None,
     limit: int = 1,
 ) -> dict:
+    """
+    Get the latest response from a specific agent from memory.
+    
+    Args:
+        agent_name: Name of the agent (e.g., "idea_intake_agent", "market_analysis_agent")
+        app_name: Application name (default: "startup-builder")
+        user_id: Optional user ID to filter by specific user. If None, searches all users.
+        limit: Number of results to return (default: 1)
+    
+    Returns:
+        dict with status ("success", "not_found", or "error"), and if successful:
+        - agent_name: The agent name
+        - response_json: The agent's response content
+        - session_id: The session ID where this response was stored
+        - created_at: When it was created
+    """
     try:
         results = memory_service.search_responses(
             agent_name=agent_name,
@@ -85,7 +102,11 @@ def get_latest_agent_response(
                 "session_id": latest["session_id"],
                 "created_at": latest["created_at"],
             }
-        return {"status": "not_found", "message": f"No response found for {agent_name}"}
+        return {
+            "status": "not_found", 
+            "message": f"No response found for agent '{agent_name}'. The database may be empty or this agent hasn't run yet.",
+            "agent_name": agent_name
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

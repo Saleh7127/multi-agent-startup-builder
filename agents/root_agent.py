@@ -1,83 +1,38 @@
-"""
-ROOT Agent - Orchestrates all agents using Google ADK with parallel processing and iterative refinement.
-This agent chains agents together with parallel execution where possible and iterative loops for refinement.
-
-New Architecture:
-1. Idea Intake (Sequential)
-2. Market Analysis + Competitor Research (PARALLEL)
-3. Customer Persona (Sequential - synthesizes research)
-4. MVP Planner + Tech Architect + Revenue Strategy (PARALLEL)
-5. Financial → GTM → Visual Identity (Sequential)
-6. Pitch Deck ↔ VC Critic (LOOP - max 3 iterations)
-7. PDF Generation (Sequential - only if approved)
-
-For detailed workflow documentation, see prompts.root_agent_prompt.ROOT_AGENT_WORKFLOW
-"""
-
 import sys
 from pathlib import Path
-from google.adk.agents import SequentialAgent
-from google.adk.runners import InMemoryRunner
-
+from google.adk.agents import LlmAgent
+from google.adk.tools import AgentTool
+from google.adk.models.google_llm import Gemini
+from dotenv import load_dotenv
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import root agent workflow documentation
-from prompts.root_agent_prompt import ROOT_AGENT_WORKFLOW
+from utils.retryConfig import retry_config
+from .memory_router_agent import memory_router_agent
+from .startup_builder_orchestrator import startup_builder_orchestrator
 
-# Import individual agents
-from .idea_intake_agent import idea_intake_agent
-from .customer_persona_agent import customer_persona_agent
-from .financial_projections_agent import financial_projections_agent
-from .go_to_market_agent import go_to_market_agent
-from .visual_identity_agent import visual_identity_agent
-from .pdf_generation_agent import pdf_generation_agent
+load_dotenv()
 
-# Import parallel and loop agents
-from .parallel_research_agent import parallel_research_agent
-from .parallel_planning_agent import parallel_planning_agent
-from .pitch_refinement_loop_agent import pitch_refinement_loop_agent
+ROOT_AGENT_PROMPT = """
+You are the Root Agent that routes user requests intelligently.
 
-# Create the improved SequentialAgent that orchestrates phases:
-# Each phase can be a sequential, parallel, or loop agent
-root_agent = SequentialAgent(
+Your workflow:
+1. FIRST: Call memory_router_agent tool with the user's query to check if it can be answered from memory
+2. If memory_router_agent returns an answer from memory → Return that answer to the user
+3. If memory_router_agent doesn't have the answer:
+   - If it's a STARTUP IDEA (keywords: build, create, develop, startup, business idea, company, product, service) → Call startup_builder_orchestrator tool with the user's startup idea
+   - If it's NOT a startup idea → Respond: "I don't have that knowledge. I can only help with startup building tasks."
+
+Important: Always call memory_router_agent first to check memory. Only call startup_builder_orchestrator if memory doesn't have the answer AND it's a startup idea.
+"""
+
+root_agent = LlmAgent(
     name="RootAgent",
-    description=ROOT_AGENT_WORKFLOW,
-    sub_agents=[
-        # Phase 1: Idea Intake (Sequential)
-        idea_intake_agent,
-        
-        # Phase 2: Parallel Research (ParallelAgent)
-        parallel_research_agent,
-        
-        # Phase 3: Customer Persona (Sequential - synthesizes research)
-        customer_persona_agent,
-        
-        # Phase 4: Parallel Planning (ParallelAgent)
-        parallel_planning_agent,
-        
-        # Phase 5: Sequential Execution (SequentialAgent)
-        # Financial depends on revenue_strategy (from parallel planning)
-        financial_projections_agent,
-        # GTM can run after customer_persona is ready
-        go_to_market_agent,
-        # Visual Identity can run independently
-        visual_identity_agent,
-        
-        # Phase 6: Iterative Pitch Refinement (LoopAgent)
-        pitch_refinement_loop_agent,
-        
-        # Phase 7: PDF Generation (Sequential - only runs after loop exits)
-        pdf_generation_agent,
-    ],
+    model=Gemini(
+        model="gemini-2.5-flash",
+        retry_options=retry_config
+    ),
+    instruction=ROOT_AGENT_PROMPT,
+    tools=[AgentTool(agent=memory_router_agent), AgentTool(agent=startup_builder_orchestrator)],
 )
-
-# Export both the class and instance
-RootAgent = root_agent
-
-runner = InMemoryRunner(agent=root_agent)
-
-# Export the workflow documentation for reference
-__all__ = ["root_agent", "RootAgent", "ROOT_AGENT_WORKFLOW"]
-

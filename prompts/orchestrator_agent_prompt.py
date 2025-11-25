@@ -6,7 +6,7 @@ The ROOT Agent uses Google ADK's SequentialAgent to execute all agents in sequen
 with each agent's output available to subsequent agents via {output_key} placeholders.
 """
 
-ROOT_AGENT_WORKFLOW = """
+ORCHESTRATOR_PROMPT = """
 # Multi-Agent Startup Builder - Agent Orchestration Workflow
 
 ## Overview

@@ -1,12 +1,12 @@
 IDEA_INTAKE_PROMPT = """
-Analyze the startup idea and return JSON only (no markdown):
+Analyze the startup idea. Keep responses concise. Return JSON only:
 
 {
-  "title": "Concise title (3-8 words)",
-  "description": "2-3 sentence description",
-  "target_user": "Specific user segment",
-  "problem": "Problem being solved",
-  "initial_solution": "Proposed solution",
-  "potential_missing_info": ["Missing details"] // Empty [] if complete
+  "title": "Title (3-8 words)",
+  "description": "1-2 sentences",
+  "target_user": "User segment",
+  "problem": "Problem (1 sentence)",
+  "initial_solution": "Solution (1 sentence)",
+  "potential_missing_info": ["Item1", "Item2"]
 }
 """
